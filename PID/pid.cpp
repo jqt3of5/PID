@@ -1,15 +1,17 @@
 #include "pid.h"
 #include <math.h>
 
-float Kp = 2;
-float Ki = 20;
-float Kd = 5;
+#define SAMPLES 1000
+
+float Kp = 10;
+float Ki = .1;
+float Kd = 4;
 float _sp = 0;
 
 int _measurements = 0;
 int _index;
-float _times[100];
-float _pv[100];
+float _times[SAMPLES];
+float _pv[SAMPLES];
 
 void tune(float kp, float ki, float kd)
 {
@@ -28,29 +30,29 @@ void setProcessVariable(float pv, float time)
 	_times[_index] = time;
 	_pv[_index] = pv;
 
-	if (_measurements < 100)
+	if (_measurements < SAMPLES)
 	{
 		_measurements += 1;
 	}
 	
-	_index = (_index + 1) % 100;
+	_index = (_index + 1) % SAMPLES;
 }
 
 float error()
 {
-	return _sp - _pv[_index];
+	return _sp - _pv[(_index - 1 + SAMPLES) % SAMPLES];
 }
 
 float integrateError()
 {
 	//Array is a ring of measurements
-	auto start = _measurements == 100 ? _index : 0;
+	auto start = _measurements == SAMPLES ? _index : 0;
 
 	float error = 0;
-	for (int i = 0, j = start; i < _measurements - 1; i++, j = (j + 1) % 100)
+	for (int i = 0, j = start; i < _measurements - 1; i++, j = (j + 1) % SAMPLES)
 	{
 		//Invariant: error = integrate(start, j, pv over dt)
-		auto timeStep = _times[(j + 1) % 100] - _times[j];
+		auto timeStep = _times[(j + 1) % SAMPLES] - _times[j];
 		error += (_sp - _pv[j]) * timeStep;
 	}
 	return error;
@@ -63,8 +65,8 @@ float derivativeError()
 	{
 		return 0;
 	}
-	auto error1 = _sp - _pv[_index];
-	auto error2 = _sp - _pv[(_index - 1 + 100) % 100];
+	auto error1 = _sp - _pv[(_index - 1 + SAMPLES) % SAMPLES];
+	auto error2 = _sp - _pv[(_index - 2 + SAMPLES) % SAMPLES];
 
 	return error1 - error2;
 }

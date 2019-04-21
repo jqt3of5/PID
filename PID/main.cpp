@@ -25,15 +25,30 @@ int main()
 		//Time steps to heat/cool
 		auto mv = getManipulatedVariable();
 	
+		
 		//Negative to cool, positive to heat
-		heating = mv > 0 ? true : false;
+		bool h = mv > 0 ? true : false;
 
-		//Skip time steps to heat/cool
-		//for (int j = 0; j < fabsf(mv); ++j, ++i)
+		//artificial control delay
+		if (heating != h)
 		{
-//			temp = readTemp();
-	//		setProcessVariable(temp, i * timeStep);
-		//	printf("%f %f\n", i * timeStep, temp);
+			i += 1;
+			for (int j = 0; j < 50; ++j, ++i)
+			{
+				temp = readTemp();
+				setProcessVariable(temp, i * timeStep);
+				printf("%f %f\n", i * timeStep, temp);
+			}
+		}
+
+		heating = h;
+		//Skip time steps to heat/cool
+		i += 1;
+		for (int j = 0; j < fabsf(mv); ++j, ++i)
+		{
+			temp = readTemp();
+			setProcessVariable(temp, i * timeStep);
+			printf("%f %f\n", i * timeStep, temp);
 		}
 	}
 }
