@@ -1,9 +1,9 @@
 #include "pid.h"
 #include <math.h>
 
-float Kp = 8;
-float Ki = .02;
-float Kd = 4;
+float Kp = 10;
+float Ki = 0;
+float Kd = 20;
 float _sp = 0;
 
 float _pv;
@@ -27,7 +27,7 @@ void setProcessVariable(float pv, float time)
 {
 	auto timeStep = time - _time;
 	integratedError += (_sp - pv) * timeStep;
-	derivedError = (_sp - pv) - (_sp - _pv);
+	derivedError = ((_sp - pv) - (_sp - _pv))/ timeStep;
 
 	_time = time;
 	_pv = pv;
