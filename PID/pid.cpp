@@ -1,9 +1,9 @@
 #include "pid.h"
 #include <math.h>
 
-float Kp = 10;
-float Ki = 0;
-float Kd = 20;
+float Kp = 2;
+float Ki = .00025;
+float Kd = 35;
 float _sp = 0;
 
 float _pv;

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <math.h>
 #include "pid.h"
+#include "analysis.h"
 
 float readTemp();
 
@@ -12,15 +13,23 @@ float timeStep = 1.0 / 8.0;
 
 int main()
 {
+	float* times = (float*)calloc(30000, sizeof(float));
+	float *values = (float*)calloc(30000, sizeof(float));
+
 	setPoint(1000);
 	setProcessVariable(readTemp(), 0);
 
-	for (int i = 0; ; ++i)
+	for (int i = 0; i < 29000; ++i)
 	{
 		auto temp = readTemp();
-		printf("%f %f\n", i * timeStep, temp);
+
+		times[i] = i * timeStep;
+		values[i] = temp;
+		
+		//printf("%f %f\n", i * timeStep, temp);
 
 		setProcessVariable(temp, i * timeStep);
+		i += 1;
 
 		//Time steps to heat/cool
 		auto mv = getManipulatedVariable();
@@ -32,25 +41,37 @@ int main()
 		//artificial control delay
 		if (heating != h)
 		{
-			i += 1;
-			for (int j = 0; j < 50; ++j, ++i)
+			
+			for (int j = 0; j < 50 && i < 29000; ++j, ++i)
 			{
 				temp = readTemp();
+
+				times[i] = i * timeStep;
+				values[i] = temp;
+
 				setProcessVariable(temp, i * timeStep);
-				printf("%f %f\n", i * timeStep, temp);
+				//printf("%f %f\n", i * timeStep, temp);
 			}
 		}
 
 		heating = h;
 		//Skip time steps to heat/cool
-		i += 1;
-		for (int j = 0; j < fabsf(mv); ++j, ++i)
+		for (int j = 0; j < fabsf(mv) && i < 29000; ++j, ++i)
 		{
 			temp = readTemp();
+
+			times[i] = i * timeStep;
+			values[i] = temp;
+
 			setProcessVariable(temp, i * timeStep);
-			printf("%f %f\n", i * timeStep, temp);
+			//printf("%f %f\n", i * timeStep, temp);
 		}
+		i -= 1;
 	}
+	float timeToMax,  avgPeriod,  avgAmplitude;
+	analyse(1000, 29000, times, values, timeToMax, avgPeriod, avgAmplitude);
+
+	printf("%f %f %f", timeToMax, avgPeriod, avgAmplitude);
 }
 
 

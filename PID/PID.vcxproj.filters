@@ -32,5 +32,8 @@
     <ClInclude Include="pid.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="analysis.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
