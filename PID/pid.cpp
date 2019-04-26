@@ -1,9 +1,13 @@
-#include "pid.h"
 #include <math.h>
+#include "pid.h"
 
-float Kp = 2;
-float Ki = .00025;
-float Kd = 35;
+float Kp = 4;
+float Ki = 0.1;
+float Kd = 10;
+
+float Td = 20;
+float Ti = 20;
+
 float _sp = 0;
 
 float _pv;
@@ -27,7 +31,12 @@ void setProcessVariable(float pv, float time)
 {
 	auto timeStep = time - _time;
 	integratedError += (_sp - pv) * timeStep;
-	derivedError = ((_sp - pv) - (_sp - _pv))/ timeStep;
+
+	if (timeStep != 0)
+	{
+		//derivedError = ((_sp - pv) - (_sp - _pv)) / timeStep;
+		derivedError = (_pv - pv) / timeStep;
+	}
 
 	_time = time;
 	_pv = pv;
@@ -41,9 +50,13 @@ float error()
 float getManipulatedVariable()
 {
 	auto p = Kp * error();
-	auto i = Ki * integratedError;
-	auto d = Kd * derivedError;
+	auto i = Ki/Ti * integratedError;
+	auto d = Kd * Td* derivedError;
 	
 	return p + i + d;
 }
 
+void setIntegralWindupMode(WindupMode mode)
+{
+
+}
