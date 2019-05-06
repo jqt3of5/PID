@@ -28,9 +28,6 @@ bool MAX31855_read(double * probeTemp, double * coldTemp, char * status) {
   digitalWrite(_ss_pin, HIGH);
   SPI1.end();
 
-  *probeTemp = 0;
-  *coldTemp = 0;
-  *status = 0;
   if (SPI1.available() > 0)
   {
     *status = rx[3] & 0xF;

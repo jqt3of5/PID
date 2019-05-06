@@ -1,33 +1,33 @@
 #include <math.h>
 #include "pid.h"
 
-float Kp = 4;
-float Ki = 0.1;
-float Kd = 10;
+double Kp = 4;
+double Ki = 0.1;
+double Kd = 10;
 
-float Td = 20;
-float Ti = 20;
+double Td = 20;
+double Ti = 20;
 
-float _sp = 0;
+double _sp = 0;
 
-float _pv;
-float _time;
-float integratedError = 0;
-float derivedError = 0;
+double _pv;
+double _time;
+double integratedError = 0;
+double derivedError = 0;
 
-void tune(float kp, float ki, float kd)
+void tune(double kp, double ki, double kd)
 {
 	Kp = kp;
 	Ki = ki;
 	Kd = kd;
 }
 
-void setPoint(float sp)
+void setPoint(double sp)
 {
 	_sp = sp;
 }
 
-void setProcessVariable(float pv, float time)
+void setProcessVariable(double pv, double time)
 {
 	auto timeStep = time - _time;
 	integratedError += (_sp - pv) * timeStep;
@@ -42,17 +42,17 @@ void setProcessVariable(float pv, float time)
 	_pv = pv;
 }
 
-float error()
+double error()
 {
 	return _sp - _pv;
 }
 
-float getManipulatedVariable()
+double getManipulatedVariable()
 {
 	auto p = Kp * error();
 	auto i = Ki/Ti * integratedError;
 	auto d = Kd * Td* derivedError;
-	
+
 	return p + i + d;
 }
 
