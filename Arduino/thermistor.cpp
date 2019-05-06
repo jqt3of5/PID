@@ -1,4 +1,4 @@
-#include <Wire.h>
+#include <math.h>
 #include "thermistor.h"
 
 const double MAX_A = 4095.0;
@@ -9,7 +9,7 @@ const double R1 = 100000.0;
 
 double readTemp(int pin)
 {
-    int temp = analogRead(pin);
+    int temp = 0;//analogRead(pin);
     //Average the readings.
     double avg_R0 = temp*R1/(MAX_A - temp);
     return 1/(A + B*log(avg_R0) + C*log(avg_R0)*log(avg_R0)*log(avg_R0)) - 273.15;
@@ -23,4 +23,4 @@ double toC(double f)
 double toF(double c)
 {
     return c * (9.0/5.0) + 32.0;
-}   
+}

@@ -1,2 +1,3 @@
-void max31855_setup_pins(int dataOut, int clk, int cs);
-void read_temp(int & probeTemp, int & coldTemp);
+#include <Wire.h>
+void MAX31855_setup(int ssPin = D5);
+bool MAX31855_read(double * probeTemp, double * coldTemp, char * status);
