@@ -33,8 +33,6 @@ int setTargetTemp(String extra)
 void setup() {
   Serial.begin(9600);
 
-  Particle.variable("time", _currentTime);
-
   Particle.variable("manipulatedVariable", pid_manipulatedVariable);
   Particle.variable("setPoint", pid_setPoint);
 
@@ -49,18 +47,51 @@ void setup() {
     MAX31855_setup();
   }
 
+  pinMode(_config.heatPin, OUTPUT);
+  pinMode(_config.coolPin, OUTPUT);
 }
 
+void updateReadings()
+{
+  if (MAX31855_read(&_probeTemp, &_coldTemp, &_status))
+  {
+    _currentTime = millis()/1000.0f;
+    if (!_idle) {
+      pid_setProcessVariable(_probeTemp, _currentTime);
+    }
+
+    Serial.printf("%f %f",_probeTemp, _coldTemp);
+    Serial.println();
+  }
+}
+
+int count = 0;
 void loop() {
 
-    if (MAX31855_read(&_probeTemp, &_coldTemp, &_status))
-    {
-      _currentTime = millis()/1000.0f;
-      if (!_idle) {
-        pid_setProcessVariable(_probeTemp, _currentTime);
-      }
+  double mv = fabsf(pid_manipulatedVariable);
+  //if the abs(mv) is still greater than our count, then we are in the active/high
+  //portion of our duty cycle
+  bool active = mv > count ? HIGH : LOW;
+  if (pid_manipulatedVariable > 0) //Heating
+  {
+    digitalWrite(_config.heatPin, active);
+    digitalWrite(_config.coolPin, LOW);
+  }
+  else //cooling
+  {
+    digitalWrite(_config.coolPin, active);
+    digitalWrite(_config.heatPin, LOW);
+  }
 
-      Serial.printf("%f %f",_probeTemp, _coldTemp);
-      Serial.println();
-    }
+  count += 1;
+  //Take new reading after 100 time steps
+  if (count >= 100)
+  {
+    count = 0;
+    updateReadings();
+    char data[100] = {0};
+    sprintf(data, "{probe:%lf,ambient:%lf, time:%lf, mv:%lf, sp:%lf}", _probeTemp, _coldTemp, _currentTime, pid_manipulatedVariable, pid_setPoint);
+    Particle.publish("Data Read", data, PUBLIC);
+  }
+
 }
