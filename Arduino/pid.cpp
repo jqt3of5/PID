@@ -1,6 +1,9 @@
 #include <math.h>
 #include "pid.h"
 
+double pid_setPoint = 0;
+double pid_manipulatedVariable = 0;
+
 double Kp = 4;
 double Ki = 0.1;
 double Kd = 10;
@@ -8,7 +11,6 @@ double Kd = 10;
 double Td = 20;
 double Ti = 20;
 
-double _sp = 0;
 
 double _pv;
 double _time;
@@ -22,15 +24,10 @@ void tune(double kp, double ki, double kd)
 	Kd = kd;
 }
 
-void setPoint(double sp)
-{
-	_sp = sp;
-}
-
-void setProcessVariable(double pv, double time)
+void pid_setProcessVariable(double pv, double time)
 {
 	auto timeStep = time - _time;
-	integratedError += (_sp - pv) * timeStep;
+	integratedError += (pid_setPoint - pv) * timeStep;
 
 	if (timeStep != 0)
 	{
@@ -40,20 +37,23 @@ void setProcessVariable(double pv, double time)
 
 	_time = time;
 	_pv = pv;
+
+	pid_updateManipulatedVariable();
 }
 
 double error()
 {
-	return _sp - _pv;
+	return pid_setPoint - _pv;
 }
 
-double getManipulatedVariable()
+double pid_updateManipulatedVariable()
 {
 	auto p = Kp * error();
 	auto i = Ki/Ti * integratedError;
 	auto d = Kd * Td* derivedError;
 
-	return p + i + d;
+	pid_manipulatedVariable = p + i + d;
+	return pid_manipulatedVariable;
 }
 
 void setIntegralWindupMode(WindupMode mode)
