@@ -12,16 +12,16 @@ struct Config {
 } _config = {D0, D1, ThermocoupleSPI};
 
 double _probeTemp = 0;
-double _coldTemp = 0;
+double _ambientTemp = 0;
 double _currentTime = 0;
 
 char _status = 0;
-bool _idle = true;
 
+bool _idle = true;
 int setTargetTemp(String extra)
 {
   _idle = false;
-  //Pro Tip: %fand %lf aren't actually supported
+  //Pro Tip: %fand %lf aren't actually supported by scanf!
   //sscanf(extra.c_str(), "%lf", &pid_setPoint);
 
   pid_setPoint = atof(extra.c_str());
@@ -36,7 +36,7 @@ void setup() {
   Particle.variable("manipulatedVariable", pid_manipulatedVariable);
   Particle.variable("setPoint", pid_setPoint);
 
-  Particle.variable("coldTemp", _coldTemp);
+  Particle.variable("ambientTemp", _ambientTemp);
   Particle.variable("probeTemp", _probeTemp);
   Particle.variable("status", _status);
 
@@ -53,14 +53,14 @@ void setup() {
 
 void updateReadings()
 {
-  if (MAX31855_read(&_probeTemp, &_coldTemp, &_status))
+  if (MAX31855_read(&_probeTemp, &_ambientTemp, &_status))
   {
     _currentTime = millis()/1000.0f;
     if (!_idle) {
       pid_setProcessVariable(_probeTemp, _currentTime);
     }
 
-    Serial.printf("%f %f",_probeTemp, _coldTemp);
+    Serial.printf("%f %f",_probeTemp, _ambientTemp);
     Serial.println();
   }
 }
@@ -90,8 +90,8 @@ void loop() {
     count = 0;
     updateReadings();
     char data[100] = {0};
-    sprintf(data, "{probe:%lf,ambient:%lf, time:%lf, mv:%lf, sp:%lf}", _probeTemp, _coldTemp, _currentTime, pid_manipulatedVariable, pid_setPoint);
-    Particle.publish("Data Read", data, PUBLIC);
+    sprintf(data, "{probe:%lf,ambient:%lf, time:%lf, mv:%lf, sp:%lf}", _probeTemp, _ambientTemp, _currentTime, pid_manipulatedVariable, pid_setPoint);
+    Particle.publish("Reading", data, PUBLIC);
   }
 
 }
