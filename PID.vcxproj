@@ -151,21 +151,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="..\pid.h">
-      <Link>pid.h</Link>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="analysis.cpp" />
     <ClCompile Include="Arduino\pid.cpp" />
-    <ClCompile Include="Arduino\thermistor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="tune.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="analysis.h" />
     <ClInclude Include="Arduino\pid.h" />
-    <ClInclude Include="Arduino\thermistor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
