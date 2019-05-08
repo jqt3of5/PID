@@ -1,15 +1,14 @@
 #pragma once
-typedef int WindupMode;
 
 extern double pid_setPoint;
 extern double pid_manipulatedVariable;
 
+typedef int WindupMode;
+const int Normal = 0, EnableWhenControllable = 1, CapIntegralTerm = 2, EraseHistory = 3;
 
-void pid_setProcessVariable(double pv, double time);
-double pid_updateManipulatedVariable();
-
-const int EnableWhenControllable = 1, CapIntegralTerm = 2, EraseHistory = 3;
-void setIntegralWindupMode(WindupMode mode);
+void pid_init( double maxOutput = 255, double minOutput = 0, WindupMode mode = Normal);
+void pid_tune(double kp, double ki, double kd);
+double pid_update(double withProcessVariable, double atTime);
 
 //Loop cycletime
 //deadtime

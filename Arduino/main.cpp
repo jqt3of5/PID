@@ -7,9 +7,10 @@ enum SensorType {ThermocoupleSPI, ThermistorAnalog};
 
 struct Config {
   int coolPin, heatPin;
+  int sampleTimeSeconds;
   SensorType type;
   int thermistorPin;
-} _config = {D0, D1, ThermocoupleSPI};
+} _config = {D0, D1, 10, ThermocoupleSPI};
 
 double _probeTemp = 0;
 double _ambientTemp = 0;
@@ -47,31 +48,48 @@ void setup() {
     MAX31855_setup();
   }
 
+  pid_init();
+
   pinMode(_config.heatPin, OUTPUT);
   pinMode(_config.coolPin, OUTPUT);
 }
 
-void updateReadings()
+bool updateReadingsIfNeeded()
 {
-  if (MAX31855_read(&_probeTemp, &_ambientTemp, &_status))
+  auto time =  millis()/1000.0f;
+  auto timeDiff = time - _currentTime;
+  if (timeDiff > _config.sampleTimeSeconds)
   {
-    _currentTime = millis()/1000.0f;
-    if (!_idle) {
-      pid_setProcessVariable(_probeTemp, _currentTime);
-    }
+    _currentTime = time;
+    if (MAX31855_read(&_probeTemp, &_ambientTemp, &_status))
+    {
+      if (!_idle) {
+          pid_update(_probeTemp, _currentTime);
+      }
 
-    Serial.printf("%f %f",_probeTemp, _ambientTemp);
-    Serial.println();
+      return true;
+    }
   }
+  return false;
 }
 
 int count = 0;
 void loop() {
 
+  if (updateReadingsIfNeeded())
+  {
+    Serial.printf("%f %f",_probeTemp, _ambientTemp);
+    Serial.println();
+
+    char data[100] = {0};
+    sprintf(data, "{probe:%lf,ambient:%lf, time:%lf, mv:%lf, sp:%lf}", _probeTemp, _ambientTemp, _currentTime, pid_manipulatedVariable, pid_setPoint);
+    Particle.publish("Reading", data, PUBLIC);
+  }
+
   double mv = fabsf(pid_manipulatedVariable);
   //if the abs(mv) is still greater than our count, then we are in the active/high
   //portion of our duty cycle
-  bool active = mv > count ? HIGH : LOW;
+  bool active = mv >= count ? HIGH : LOW;
   if (pid_manipulatedVariable > 0) //Heating
   {
     digitalWrite(_config.heatPin, active);
@@ -83,15 +101,5 @@ void loop() {
     digitalWrite(_config.heatPin, LOW);
   }
 
-  count += 1;
-  //Take new reading after 100 time steps
-  if (count >= 100)
-  {
-    count = 0;
-    updateReadings();
-    char data[100] = {0};
-    sprintf(data, "{probe:%lf,ambient:%lf, time:%lf, mv:%lf, sp:%lf}", _probeTemp, _ambientTemp, _currentTime, pid_manipulatedVariable, pid_setPoint);
-    Particle.publish("Reading", data, PUBLIC);
-  }
-
+  count = (count + 1) % 255;
 }
