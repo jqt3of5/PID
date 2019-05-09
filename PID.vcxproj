@@ -18,6 +18,16 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Arduino\pid.cpp" />
+    <ClCompile Include="src\driver\analysis.cpp" />
+    <ClCompile Include="src\driver\main.cpp" />
+    <ClCompile Include="src\driver\tune.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Arduino\pid.h" />
+    <ClInclude Include="src\driver\analysis.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{65B117A3-442C-43E1-8E5F-A740F9DEBA08}</ProjectGuid>
@@ -150,16 +160,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="analysis.cpp" />
-    <ClCompile Include="Arduino\pid.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="tune.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="analysis.h" />
-    <ClInclude Include="Arduino\pid.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

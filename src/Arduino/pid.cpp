@@ -61,6 +61,8 @@ void pid_init(double maxOutput, double minOutput, WindupMode mode)
 	_maxOutput = maxOutput;
 	_mode = mode;
 
+	_time = 0;
+
 	_integratedError = 0;
 	switch(mode)
 	{

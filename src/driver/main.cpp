@@ -3,63 +3,50 @@
 
 #include <iostream>
 #include <math.h>
-#include "Arduino/pid.h"
+#include "../Arduino/pid.h"
 #include "analysis.h"
 
 float readTemp();
 
 bool heating = false;
+bool cooling = false;
 float timeStep = 1.0 / 50.0;
 
 int main()
 {
-	start(1000);
-	setPoint(1000);
+	analysis_start(1000);
+	pid_setPoint = 1000;
+	pid_init(255, 0, EnableWhenControllable);
+	pid_tune(15, .5, 100);
 	
 	auto temp = readTemp();
-	log(0, temp);
-	setProcessVariable(temp, 0);
+	
+	pid_update(temp, 0);
 
-	for (int i = 1; i < 29000000; ++i)
+	int i = 1;
+	//run the analysis on each iteration, it can decide when to quit the simulation
+	while (analysis_update(i * timeStep, temp))
 	{
+		printf("%f %f\n", i * timeStep, temp);
 		//Time steps to heat/cool
-		auto mv = getManipulatedVariable();
-
-		if (mv > 100)
-		{
-			mv = 100;
-		}
-
-		if (mv < 0)
-		{
-			mv = 0;
-		}
-
+		auto mv = pid_update(temp, i * timeStep);
+		
 		heating = true;
 		for (int j = 0; j < mv; ++j, ++i)
 		{
 			temp = readTemp();
-
-			log(i * timeStep, temp);
-			setProcessVariable(temp, i * timeStep);
-			
 		}
 
 		heating = false;
-		for (int j = 0; j < 100 - mv; ++j, ++i)
+		for (int j = 0; j < 255 - mv; ++j, ++i)
 		{
 			temp = readTemp();
-
-			log(i * timeStep, temp);
-			setProcessVariable(temp, i * timeStep);
-//			printf("%f %f\n", i * timeStep, temp);
 		}
-		printf("%f %f\n", i * timeStep, temp);
 	}
 
 
 	float timeToMax,  avgPeriod,  avgAmplitude;
-	analyse(timeToMax, avgPeriod, avgAmplitude);
+	analysis_analyse(timeToMax, avgPeriod, avgAmplitude);
 
 	printf("%f %f %f", timeToMax, avgPeriod, avgAmplitude);
 }
@@ -72,8 +59,8 @@ int main()
 
 float ambientTemp = 20; //Celcius
 float maxAttainableTemp = 2000; //Celcius, point where ability to heat is equal to dissipated heat
-float heatingRate = 1;//Celcius per Second, perfect insulation
-
+float heatingRate = 1; //Celcius per Second, perfect insulation
+float deadTime = 10; //Time it takes output to be measured
 float coolingFactor = (maxAttainableTemp - ambientTemp) * (maxAttainableTemp - ambientTemp) / heatingRate;
 
 float heatingdt(float temp)
@@ -81,35 +68,51 @@ float heatingdt(float temp)
 	return heatingRate;
 }
 
-float coolingdt(float temp)
+float neutraldt(float temp)
 {
 	auto a = (temp - ambientTemp);
-	return - a * a / coolingFactor;
+	return -a * a / coolingFactor;
+}
+
+float coolingdt(float temp)
+{
+	return 0;
 }
 
 float readTemp()
 {
-	static float temp = ambientTemp;
+	//Implement dead time simulation
+	static int index = 0;
+	static int sampleCount = deadTime / timeStep + 1;
+	static float* history = new float[sampleCount] {ambientTemp};
 
-	float t = coolingdt(temp);
+	static float time = 0;
+
+	float temp = history[index];
+
+	//Get the natural change
+	float dtemp = neutraldt(temp);
+
+	//if the heater is active, add the heat change
 	if (heating)
 	{
-		t += heatingdt(temp);
+		dtemp += heatingdt(temp);
+	}
+
+	//if the cooler is active, add the cooling change
+	if (cooling)
+	{
+		dtemp += coolingdt(temp);
 	}
 	
-	temp += t * timeStep;
+	temp += dtemp * timeStep;
+	
+	//We'll grab the temp at the next index from the array to be the temp currently being read
+	//Then we'll update it with the actual current temp (That will be read in a little while!)
+	index = (index + 1) % sampleCount;
+	float readTemp = history[index];
+	history[index] = temp;
 
-	return temp;
+	time += timeStep;
+	return readTemp;
 }
-
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

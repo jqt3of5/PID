@@ -1,5 +1,5 @@
 #pragma once
 
-void start(float target);
-void log(float time, float value);
-void analyse(float& timeToMax, float& period, float& amplitude);
+void analysis_start(float target);
+void analysis_analyse(float& timeToMax, float& period, float& amplitude);
+bool analysis_update(float time, float value);

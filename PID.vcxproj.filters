@@ -15,35 +15,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\pid.h">
-      <Filter>Header Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="analysis.cpp">
+    <ClCompile Include="src\driver\analysis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="src\driver\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tune.cpp">
+    <ClCompile Include="src\driver\tune.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Arduino\pid.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Arduino\thermistor.cpp">
+    <ClCompile Include="src\Arduino\pid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="analysis.h">
+    <ClInclude Include="src\driver\analysis.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Arduino\pid.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Arduino\thermistor.h">
+    <ClInclude Include="src\Arduino\pid.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
