@@ -9,6 +9,10 @@ static double Kp = 1;
 static double Ki = 0;
 static double Kd = 0;
 
+double * pid_Kp() { return &Kp; }
+double * pid_Ki() { return &Ki; }
+double * pid_Kd() { return &Kd; }
+
 double _pv;
 double _time;
 
@@ -48,12 +52,6 @@ inline double band(double n, double maxVal, double minVal)
 	return max(minVal, min(maxVal, n));
 }
 
-void pid_tune(double kp, double ki, double kd)
-{
-	Kp = kp;
-	Ki = ki;
-	Kd = kd;
-}
 
 void pid_init(double maxOutput, double minOutput, WindupMode mode)
 {

@@ -32,6 +32,7 @@ bool MAX31855_read(double * probeTemp, double * coldTemp, char * status) {
   {
     *status = rx[3] & 0xF;
 
+    //Doesnt' handle negative temps...
     *probeTemp = ProbeStep * ((rx[0] << 6) | (rx[1] >> 2));
     *coldTemp = ColdStep * ((rx[2] << 4) | (rx[3] >> 4));
     return true;

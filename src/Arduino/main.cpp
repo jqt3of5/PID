@@ -10,7 +10,7 @@ struct Config {
   int sampleTimeSeconds;
   SensorType type;
   int thermistorPin;
-} _config = {D0, D1, 10, ThermocoupleSPI};
+} _config = {D0, D7, 10, ThermocoupleSPI};
 
 double _probeTemp = 0;
 double _ambientTemp = 0;
@@ -31,6 +31,19 @@ int setTargetTemp(String extra)
   return 0;
 }
 
+int setKd(String extra)
+{
+  *pid_Kd() = atof(extra.c_str());
+}
+int setKi(String extra)
+{
+  *pid_Ki() = atof(extra.c_str());
+}
+int setKp(String extra)
+{
+  *pid_Kp() = atof(extra.c_str());
+}
+
 void setup() {
   Serial.begin(9600);
 
@@ -41,7 +54,14 @@ void setup() {
   Particle.variable("probeTemp", _probeTemp);
   Particle.variable("status", _status);
 
+  Particle.variable("Kp", *pid_Kp());
+  Particle.variable("Ki", *pid_Ki());
+  Particle.variable("Kd", *pid_Kd());
+
   Particle.function("setTargetTemp", setTargetTemp);
+  Particle.function("setKp", setKp);
+  Particle.function("setKi", setKi);
+  Particle.function("setKd", setKd);
 
   if (_config.type == ThermocoupleSPI)
   {
@@ -100,6 +120,7 @@ void loop() {
     digitalWrite(_config.coolPin, active);
     digitalWrite(_config.heatPin, LOW);
   }
+  delay(10);
 
   count = (count + 1) % 255;
 }
