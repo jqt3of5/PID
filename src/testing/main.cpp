@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <math.h>
-#include "../Arduino/pid.h"
+#include "../pid/pid.h"
 #include "analysis.h"
 
 float readTemp();
@@ -15,13 +15,16 @@ float timeStep = 1.0 / 50.0;
 int main()
 {
 	analysis_start(1000);
-	pid_setPoint = 1000;
-	pid_init(255, 0, EnableWhenControllable);
-	pid_tune(15, .5, 100);
-	
+	auto state = pid_init(255, 0, EnableWhenControllable);
+
+	state->setPoint = 1000;
+	state->Kp = 15;
+	state->Ki = .5;
+	state->Kd = 100;
+
 	auto temp = readTemp();
 	
-	pid_update(temp, 0);
+	pid_update(state, temp, 0);
 
 	int i = 1;
 	//run the analysis on each iteration, it can decide when to quit the simulation
@@ -29,7 +32,7 @@ int main()
 	{
 		printf("%f %f\n", i * timeStep, temp);
 		//Time steps to heat/cool
-		auto mv = pid_update(temp, i * timeStep);
+		auto mv = pid_update(state, temp, i * timeStep);
 		
 		heating = true;
 		for (int j = 0; j < mv; ++j, ++i)
