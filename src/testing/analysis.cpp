@@ -1,3 +1,5 @@
+#ifdef TESTING
+
 #include <math.h>
 #include <iostream>
 
@@ -119,3 +121,4 @@ void analysis_analyse(float& timeToMax, float& period, float& amplitude)
 	amplitude = amplitude / _critIndex;
 }
 
+#endif

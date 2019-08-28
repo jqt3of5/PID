@@ -1,6 +1,7 @@
 // PID.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+#ifdef TESTING
 #include <iostream>
 #include <math.h>
 #include "../pid/pid.h"
@@ -119,3 +120,4 @@ float readTemp()
 	time += timeStep;
 	return readTemp;
 }
+#endif

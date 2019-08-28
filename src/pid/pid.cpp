@@ -45,6 +45,7 @@ PIDState * pid_init(double maxOutput, double minOutput, WindupMode mode)
 			state->_history = (double*)calloc(state->_historyCount, sizeof(double));
 			break;
 	}
+	return state;
 }
 
 double calculateIntegratedError(PIDState * state, double error, double timeStep)
