@@ -17,6 +17,16 @@ inline double band(double n, double maxVal, double minVal)
 	return max(minVal, min(maxVal, n));
 }
 
+char * toString(PIDState * state)
+{
+	char * format = "{setPoint:%f, mv:%f, pv:%f, kp:%f, ki:%f, kd:%f, active:%b}";
+
+	char str[255] = {0};
+	ssprintf(str, format, state->setPoint, state->manipulatedVariable, state->_pv, state->Kp, state->Ki, state->Kd, state->active);
+
+	return str;
+}
+
 
 PIDState * pid_init(double maxOutput, double minOutput, WindupMode mode)
 {
@@ -27,6 +37,7 @@ PIDState * pid_init(double maxOutput, double minOutput, WindupMode mode)
 	state->_mode = mode;
 
 	state->_time = 0;
+	state->active = false;
 
 	state->_integratedError = 0;
 	switch(mode)
@@ -91,6 +102,10 @@ double pid_update(PIDState * state, double withProcessVariable, double atTime)
 {
 	auto timeStep = atTime - state->_time;
 	state->_time = atTime;
+
+	if (!state->active) {
+		return state->manipulatedVariable;
+	}
 
 	auto error = state->setPoint - withProcessVariable;
 	auto derivedError = (withProcessVariable - state->_pv) / timeStep;

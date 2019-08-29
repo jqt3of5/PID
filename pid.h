@@ -13,6 +13,7 @@ struct PIDState
     double Ki;
     double Kd;
 
+    bool active;
 
     WindupMode _mode;
     double _pv;
@@ -46,5 +47,6 @@ PIDState * pid_init( double maxOutput = 255, double minOutput = 0, WindupMode mo
 
 double pid_update(PIDState * state, double withProcessVariable, double atTime);
 
+char * toString(PIDState * state);
 //Loop cycletime
 //deadtime
