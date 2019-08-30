@@ -1,6 +1,7 @@
 #include <math.h>
 #include "pid.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 inline double max(double a, double b)
 {
@@ -17,12 +18,12 @@ inline double band(double n, double maxVal, double minVal)
 	return max(minVal, min(maxVal, n));
 }
 
-char * toString(PIDState * state)
+char * pid_toString(PIDState * state)
 {
-	char * format = "{setPoint:%f, mv:%f, pv:%f, kp:%f, ki:%f, kd:%f, active:%b}";
+	char * format = "{setPoint:%.2f, mv:%.2f, pv:%.2f, kp:%.2f, ki:%.2f, kd:%.2f, active:%b}";
 
-	char str[255] = {0};
-	ssprintf(str, format, state->setPoint, state->manipulatedVariable, state->_pv, state->Kp, state->Ki, state->Kd, state->active);
+	char * str = (char*)calloc(255, sizeof(char));
+	sprintf(str, format, state->setPoint, state->manipulatedVariable, state->_pv, state->Kp, state->Ki, state->Kd, state->active);
 
 	return str;
 }
@@ -32,9 +33,9 @@ PIDState * pid_init(double maxOutput, double minOutput, WindupMode mode)
 {
 	PIDState * state = (PIDState*)calloc(1, sizeof(PIDState));
 
-	state->_minOutput = minOutput;
-	state->_maxOutput = maxOutput;
-	state->_mode = mode;
+	state->minOutput = minOutput;
+	state->maxOutput = maxOutput;
+	state->mode = mode;
 
 	state->_time = 0;
 	state->active = false;
@@ -61,14 +62,14 @@ PIDState * pid_init(double maxOutput, double minOutput, WindupMode mode)
 
 double calculateIntegratedError(PIDState * state, double error, double timeStep)
 {
-	switch(state->_mode)
+	switch(state->mode)
 	{
 		case Normal:
 			state->_integratedError += error * timeStep;
 			break;
 
 		case EnableWhenControllable:
-			if (state->Kp*error < state->_maxOutput)
+			if (state->Kp*error < state->maxOutput)
 			{
 				state->_integratedError += error * timeStep;
 			}
@@ -117,6 +118,6 @@ double pid_update(PIDState * state, double withProcessVariable, double atTime)
 	auto i = state->Ki * integratedError;
 	auto d = state->Kd * derivedError;
 
-	state->manipulatedVariable = band(p + i - d, state->_maxOutput, state->_minOutput);
+	state->manipulatedVariable = band(p + i - d, state->maxOutput, state->minOutput);
 	return state->manipulatedVariable;
 }

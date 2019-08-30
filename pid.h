@@ -9,18 +9,15 @@ struct PIDState
     double setPoint;
     double manipulatedVariable;
     
-    double Kp;
-    double Ki;
-    double Kd;
+    double Kp, Ki, Kd;
 
     bool active;
+    
+    WindupMode mode;
+    double minOutput, maxOutput;
 
-    WindupMode _mode;
     double _pv;
     double _time;
-
-    double _minOutput;
-    double _maxOutput;
 
     //Normal = 0,
     //Doesn't modify the integration term at all, sums it up as is.
@@ -39,7 +36,6 @@ struct PIDState
     double * _history;
     int _historyCount;
     int _historyIndex;
-
 };
 
 
@@ -47,6 +43,6 @@ PIDState * pid_init( double maxOutput = 255, double minOutput = 0, WindupMode mo
 
 double pid_update(PIDState * state, double withProcessVariable, double atTime);
 
-char * toString(PIDState * state);
+char * pid_toString(PIDState * state);
 //Loop cycletime
 //deadtime
