@@ -105,6 +105,7 @@ double pid_update(PIDState * state, double withProcessVariable, double atTime)
 	state->_time = atTime;
 
 	if (!state->active) {
+		state->_pv = withProcessVariable;
 		return 0;
 	}
 
