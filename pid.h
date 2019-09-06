@@ -43,6 +43,6 @@ PIDState * pid_init( double maxOutput = 255, double minOutput = 0, WindupMode mo
 
 double pid_update(PIDState * state, double withProcessVariable, double atTime);
 
-char * pid_toString(PIDState * state);
+char * pid_toString(PIDState * state, char * string);
 //Loop cycletime
 //deadtime

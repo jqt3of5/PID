@@ -18,14 +18,13 @@ inline double band(double n, double maxVal, double minVal)
 	return max(minVal, min(maxVal, n));
 }
 
-char * pid_toString(PIDState * state)
+char * pid_toString(PIDState * state, char * string)
 {
 	const char * format = "{setPoint:%.2f, mv:%.2f, pv:%.2f, kp:%.2f, ki:%.2f, kd:%.2f, active:%d}";
 
-	char * str = (char*)calloc(255, sizeof(char));
-	sprintf(str, format, state->setPoint, state->manipulatedVariable, state->_pv, state->Kp, state->Ki, state->Kd, state->active);
+	sprintf(string, format, state->setPoint, state->manipulatedVariable, state->_pv, state->Kp, state->Ki, state->Kd, state->active);
 
-	return str;
+	return string;
 }
 
 
